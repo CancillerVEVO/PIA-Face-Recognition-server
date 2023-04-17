@@ -1,9 +1,18 @@
 import { Request, Response } from "express";
+import { register } from "../services";
 
 const registerController = async ({ body }: Request, res: Response) => {
   try {
-    res.send("Register");
+    const user = await register(body);
+
+    if (!user) {
+      throw new Error("ERROR_REGISTERING_USER");
+    }
+    res.status(200);
+    res.send(user);
   } catch (e) {
+    res.status(403);
+    res.send("ERROR_REGISTERING_USER");
     console.log(e);
   }
 };
