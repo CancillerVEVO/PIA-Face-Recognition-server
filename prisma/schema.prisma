@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model assistance {
+  id                                String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  eventId                           String    @db.Uuid
+  userId                            String    @db.Uuid
+  attended                          Boolean   @default(false)
+  attendedDate                      DateTime? @db.Timestamp(6)
+  events_assistance_eventIdToevents events    @relation("assistance_eventIdToevents", fields: [eventId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  events_assistance_userIdToevents  events    @relation("assistance_userIdToevents", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model events {
+  id                                    String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  groupId                               String       @db.Uuid
+  title                                 String       @db.VarChar(255)
+  description                           String       @db.VarChar(255)
+  startDate                             DateTime     @default(now()) @db.Timestamp(6)
+  endDate                               DateTime?    @db.Timestamp(6)
+  assistance_assistance_eventIdToevents assistance[] @relation("assistance_eventIdToevents")
+  assistance_assistance_userIdToevents  assistance[] @relation("assistance_userIdToevents")
+  groups                                groups       @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model groups {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title       String    @db.VarChar(255)
+  description String    @db.VarChar(255)
+  createdBy   String    @db.Uuid
+  createdAt   DateTime  @default(now()) @db.Timestamp(6)
+  events      events[]
+  users       users     @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  members     members[]
+}
+
+model members {
+  id       String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  groupId  String   @db.Uuid
+  userId   String   @db.Uuid
+  joinedAt DateTime @default(now()) @db.Timestamp(6)
+  groups   groups   @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users    users    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model users {
+  id       String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username String    @unique @db.VarChar(255)
+  email    String    @unique @db.VarChar(255)
+  pass     String    @db.VarChar(255)
+  imageUrl String?   @db.VarChar(255)
+  groups   groups[]
+  members  members[]
+}
