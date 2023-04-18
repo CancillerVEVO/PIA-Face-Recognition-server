@@ -1,3 +1,3 @@
-import { register } from "./auth.service";
+import { register, login } from "./auth.service";
 
-export { register };
+export { register, login };
