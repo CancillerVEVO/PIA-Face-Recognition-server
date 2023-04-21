@@ -65,9 +65,6 @@ const login = async ({ email, password }: User) => {
 
   const token = generateToken({
     id: user.id,
-    username: user.username,
-    email: user.email,
-    imageUrl: user.imageUrl,
   });
 
   return token;
