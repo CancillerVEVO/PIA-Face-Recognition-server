@@ -1,19 +1,20 @@
 import { Response } from "express";
 import { RequestExt } from "../interfaces/requestExt";
-import { uploadFaceData } from "../services/face-image.service";
+import { saveFaceData } from "../services/face-image.service";
 
-const uploadFileController = async (req: RequestExt, res: Response) => {
+const uploadFileController = async (
+  { user, file }: RequestExt,
+  res: Response
+) => {
   try {
-    const user = req.user;
-    const file = req.file;
-
     if (!file) {
       throw new Error("No file uploaded");
     }
 
-    const url = await uploadFaceData(file);
+    const updatedUser = await saveFaceData(file, user?.id);
 
-    res.status(200).json({ user, url });
+    res.status(200);
+    res.send(updatedUser);
   } catch (e) {
     console.log(e);
     res.status(500);

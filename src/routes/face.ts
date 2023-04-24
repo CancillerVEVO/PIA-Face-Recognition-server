@@ -1,7 +1,7 @@
-import { Request, Response, Router } from "express";
-import { checkJWT } from "../middlewares/";
-import multer from "multer";
+import { Router } from "express";
+import { checkJWT, uploadMiddleware } from "../middlewares/";
 import { uploadFileController } from "../controllers/face-image.controller";
+import multer from "multer";
 
 const router = Router();
 
@@ -11,6 +11,7 @@ router.post(
   "/upload",
   upload.single("filename"),
   checkJWT,
+  uploadMiddleware,
   uploadFileController
 );
 
