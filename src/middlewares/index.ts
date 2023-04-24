@@ -1,3 +1,3 @@
 import { registerMiddleware, loginMiddleware } from "./auth.middleware";
-
-export { registerMiddleware, loginMiddleware };
+import { checkJWT } from "./session.middleware";
+export { registerMiddleware, loginMiddleware, checkJWT };
