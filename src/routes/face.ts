@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { checkJWT, uploadMiddleware } from "../middlewares/";
-import { uploadFileController } from "../controllers/face-image.controller";
+import {
+  uploadFileController,
+  deleteFileController,
+} from "../controllers/face-image.controller";
 import multer from "multer";
 
 const router = Router();
@@ -14,5 +17,9 @@ router.post(
   uploadMiddleware,
   uploadFileController
 );
+
+router.delete("/", checkJWT, deleteFileController);
+
+router.post("/recognition", checkJWT);
 
 export { router };

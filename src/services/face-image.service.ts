@@ -35,4 +35,31 @@ const saveFaceData = async (file: any, id: string) => {
 
   return updatedUser;
 };
-export { saveFaceData };
+
+const deleteFaceData = async (id: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: id,
+    },
+  });
+
+  if (user?.imageUrl) {
+    const exists = await checkImageExists(user.imageUrl);
+
+    if (exists) {
+      await deleteImage(user.imageUrl);
+    }
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: id,
+    },
+    data: {
+      imageUrl: null,
+    },
+  });
+
+  return updatedUser;
+};
+export { saveFaceData, deleteFaceData };
