@@ -14,7 +14,9 @@ const uploadFileController = async (
     const updatedUser = await saveFaceData(file, user?.id);
 
     res.status(200);
-    res.send(updatedUser);
+    res.send({
+      message: "File uploaded successfully",
+    });
   } catch (e) {
     console.log(e);
     res.status(500);
