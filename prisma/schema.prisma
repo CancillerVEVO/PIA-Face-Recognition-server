@@ -7,54 +7,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Assistance {
-  id                              String    @id(map: "assistance_pkey") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  eventId                         String    @db.Uuid
-  userId                          String    @db.Uuid
-  attended                        Boolean   @default(false)
-  attendedDate                    DateTime? @db.Timestamp(6)
-  Event_Assistance_eventIdToEvent Event     @relation("Assistance_eventIdToEvent", fields: [eventId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "assistance_eventId_fkey")
-  Event_Assistance_userIdToEvent  Event     @relation("Assistance_userIdToEvent", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "assistance_userId_fkey")
-}
-
 model Event {
-  id                                   String       @id(map: "events_pkey") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  groupId                              String       @db.Uuid
-  title                                String       @db.VarChar(255)
-  description                          String       @db.VarChar(255)
-  startDate                            DateTime     @default(now()) @db.Timestamp(6)
-  endDate                              DateTime?    @db.Timestamp(6)
-  Assistance_Assistance_eventIdToEvent Assistance[] @relation("Assistance_eventIdToEvent")
-  Assistance_Assistance_userIdToEvent  Assistance[] @relation("Assistance_userIdToEvent")
-  Group                                Group        @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "events_groupId_fkey")
+  id          Int          @id @default(autoincrement())
+  createdBy   Int
+  groupId     Int
+  title       String       @db.VarChar(255)
+  description String       @db.VarChar(255)
+  startDate   DateTime     @default(now()) @db.Timestamptz(6)
+  endDate     DateTime?    @db.Timestamptz(6)
+  Attendance  Attendance[]
+  Member      Member       @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Group       Group        @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "events_groupId_fkey")
 }
 
 model Group {
-  id          String   @id(map: "groups_pkey") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  title       String   @db.VarChar(255)
-  description String   @db.VarChar(255)
-  createdBy   String   @db.Uuid
-  createdAt   DateTime @default(now()) @db.Timestamp(6)
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(255)
+  createdBy   Int
+  description String    @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
+  deletedAt   DateTime? @db.Timestamptz(6)
   Event       Event[]
-  User        User     @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "groups_createdBy_fkey")
+  User        User      @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Member      Member[]
 }
 
 model Member {
-  id       String   @id(map: "members_pkey") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  groupId  String   @db.Uuid
-  userId   String   @db.Uuid
-  joinedAt DateTime @default(now()) @db.Timestamp(6)
-  Group    Group    @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "members_groupId_fkey")
-  User     User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "members_userId_fkey")
+  id         Int          @id @default(autoincrement())
+  userId     Int
+  groupId    Int
+  roleId     Int
+  joinedAt   DateTime     @default(now()) @db.Timestamptz(6)
+  deletedAt  DateTime?    @db.Timestamptz(6)
+  Attendance Attendance[]
+  Event      Event[]
+  Group      Group        @relation(fields: [groupId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "members_groupId_fkey")
+  MemberRole MemberRole   @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User       User         @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "members_userId_fkey")
 }
 
 model User {
-  id       String   @id(map: "users_pkey") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  username String   @unique(map: "users_username_key") @db.VarChar(255)
-  email    String   @unique(map: "users_email_key") @db.VarChar(255)
-  imageUrl String?  @db.VarChar(255)
-  password String   @db.VarChar(255)
-  Group    Group[]
-  Member   Member[]
+  id        Int       @id @default(autoincrement())
+  username  String    @unique @db.VarChar(50)
+  email     String    @unique @db.VarChar(255)
+  password  String    @db.VarChar(255)
+  imageUrl  String?   @db.VarChar(255)
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  deletedAt DateTime? @db.Timestamptz(6)
+  Group     Group[]
+  Member    Member[]
+}
+
+model Attendance {
+  memberId     Int
+  eventId      Int
+  attendedDate DateTime @default(now()) @db.Timestamptz(6)
+  Event        Event    @relation(fields: [eventId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Member       Member   @relation(fields: [memberId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([memberId, eventId])
+}
+
+model MemberRole {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(50)
+  description String   @db.VarChar(255)
+  Member      Member[]
 }

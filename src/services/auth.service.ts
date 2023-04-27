@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { encrypt, verify } from "../utils/bcrypt.handler";
 import { generateToken } from "../utils/jwt.handler";
 import { User } from "@prisma/client";

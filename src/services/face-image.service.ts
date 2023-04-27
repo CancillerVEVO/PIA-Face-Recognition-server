@@ -8,7 +8,7 @@ import { recognize } from "../utils/recognition.handler";
 
 const prisma = new PrismaClient();
 
-const saveFaceData = async (file: any, id: string) => {
+const saveFaceData = async (file: any, id: number) => {
   const user = await prisma.user.findUnique({
     where: {
       id: id,
@@ -37,18 +37,23 @@ const saveFaceData = async (file: any, id: string) => {
   return updatedUser;
 };
 
-const deleteFaceData = async (id: string) => {
+const deleteFaceData = async (id: number) => {
   const user = await prisma.user.findUnique({
     where: {
       id: id,
     },
   });
 
-  if (user?.imageUrl) {
-    const exists = await checkImageExists(user.imageUrl);
+  if (typeof user?.imageUrl != "string") {
+    throw new Error("User image not found");
+  }
 
+  if (typeof user?.imageUrl == "string") {
+    const exists = await checkImageExists(user.imageUrl);
     if (exists) {
       await deleteImage(user.imageUrl);
+    } else {
+      throw new Error("User image not found");
     }
   }
 
@@ -64,14 +69,18 @@ const deleteFaceData = async (id: string) => {
   return updatedUser;
 };
 
-const recognizeFace = async (file: any, id: string) => {
+const recognizeFace = async (file: any, id: number) => {
   const user = await prisma.user.findUnique({
     where: {
       id: id,
     },
   });
 
-  if (user?.imageUrl) {
+  if (typeof user?.imageUrl != "string") {
+    throw new Error("User image not found");
+  }
+
+  if (typeof user?.imageUrl == "string") {
     const exists = await checkImageExists(user.imageUrl);
 
     if (!exists) {

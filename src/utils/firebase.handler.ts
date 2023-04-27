@@ -36,7 +36,6 @@ const uploadImage = (file: any, path: string) => {
         }
       },
       (error) => {
-        console.log(error);
         reject(new Error("Error uploading file"));
       },
       () => {
@@ -45,7 +44,6 @@ const uploadImage = (file: any, path: string) => {
             resolve(downloadURL);
           })
           .catch((error) => {
-            console.log(error);
             reject(new Error("Error getting download URL"));
           });
       }
@@ -62,7 +60,6 @@ const deleteImage = (url: string) => {
         resolve();
       })
       .catch((error) => {
-        console.log(error);
         reject(new Error("Error deleting file"));
       });
   });
@@ -80,7 +77,6 @@ const checkImageExists = (filePath: string) => {
         if (error.code === "storage/object-not-found") {
           resolve(false);
         } else {
-          console.log(error);
           reject(new Error("Error checking file"));
         }
       });

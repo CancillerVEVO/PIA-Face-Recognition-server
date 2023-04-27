@@ -14,11 +14,12 @@ const uploadFileController = async (
     await saveFaceData(file, user?.id);
 
     res.status(200);
-    res.send("File uploaded successfully");
+    res.json({ message: "File uploaded successfully" });
   } catch (e) {
-    console.log(e);
     res.status(500);
-    e instanceof Error ? res.json(e.message) : res.json(e);
+    e instanceof Error
+      ? res.json({ message: e.message })
+      : res.json({ message: e });
   }
 };
 
@@ -27,11 +28,12 @@ const deleteFileController = async ({ user }: RequestExt, res: Response) => {
     await deleteFaceData(user?.id);
 
     res.status(200);
-    res.send("File deleted successfully");
+    res.send({ message: "File deleted successfully" });
   } catch (e) {
-    console.log(e);
-    res.status(500);
-    e instanceof Error ? res.send(e.message) : res.send(e);
+    res.status(404);
+    e instanceof Error
+      ? res.json({ message: e.message })
+      : res.json({ message: e });
   }
 };
 
@@ -41,10 +43,12 @@ const recognizeFaceController = async (
 ) => {
   try {
     await recognizeFace(file, user?.id);
-    res.sendStatus(200);
+    res.status(200).json({ message: "Face recognized successfully" });
   } catch (e) {
     res.status(404);
-    e instanceof Error ? res.send(e.message) : res.send(e);
+    e instanceof Error
+      ? res.json({ message: e.message })
+      : res.json({ message: e });
   }
 };
 

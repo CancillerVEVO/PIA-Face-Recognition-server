@@ -8,10 +8,12 @@ const registerController = async ({ body }: Request, res: Response) => {
     res.status(200);
     res.send(user);
   } catch (e) {
-    res.status(403);
-
-    res.send("ERROR_REGISTERING_USER");
     console.log(e);
+
+    res.status(403);
+    e instanceof Error
+      ? res.json({ message: e.message })
+      : res.json({ mesage: e });
   }
 };
 const loginController = async ({ body }: Request, res: Response) => {
@@ -21,9 +23,12 @@ const loginController = async ({ body }: Request, res: Response) => {
     res.status(200);
     res.send(user);
   } catch (e) {
-    res.status(403);
-    res.send("ERROR_LOGGING_IN");
     console.log(e);
+
+    res.status(403);
+    e instanceof Error
+      ? res.json({ message: e.message })
+      : res.json({ message: e });
   }
 };
 
