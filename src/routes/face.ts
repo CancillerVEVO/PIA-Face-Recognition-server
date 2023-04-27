@@ -3,6 +3,7 @@ import { checkJWT, uploadMiddleware } from "../middlewares/";
 import {
   uploadFileController,
   deleteFileController,
+  recognizeFaceController,
 } from "../controllers/face-image.controller";
 import multer from "multer";
 
@@ -20,6 +21,12 @@ router.post(
 
 router.delete("/", checkJWT, deleteFileController);
 
-router.post("/recognition", checkJWT);
+router.post(
+  "/recognition",
+  upload.single("filename"),
+  checkJWT,
+  uploadMiddleware,
+  recognizeFaceController
+);
 
 export { router };

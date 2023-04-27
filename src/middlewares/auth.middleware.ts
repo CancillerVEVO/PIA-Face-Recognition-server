@@ -49,7 +49,9 @@ const loginMiddleware = async (
     }
 
     next();
-  } catch (e) {}
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 export { registerMiddleware, loginMiddleware };

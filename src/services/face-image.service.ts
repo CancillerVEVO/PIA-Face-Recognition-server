@@ -4,6 +4,7 @@ import {
   deleteImage,
   checkImageExists,
 } from "../utils/firebase.handler";
+import { recognize } from "../utils/recognition.handler";
 
 const prisma = new PrismaClient();
 
@@ -62,4 +63,34 @@ const deleteFaceData = async (id: string) => {
 
   return updatedUser;
 };
-export { saveFaceData, deleteFaceData };
+
+const recognizeFace = async (file: any, id: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: id,
+    },
+  });
+
+  if (user?.imageUrl) {
+    const exists = await checkImageExists(user.imageUrl);
+
+    if (!exists) {
+      throw new Error("User image not found");
+    }
+  }
+
+  const url = await uploadImage(file, "tmp");
+
+  const response = await recognize({
+    known: [
+      {
+        image_url: user?.imageUrl,
+        label: user?.username,
+      },
+    ],
+    unknown: url,
+  });
+
+  return response;
+};
+export { saveFaceData, deleteFaceData, recognizeFace };

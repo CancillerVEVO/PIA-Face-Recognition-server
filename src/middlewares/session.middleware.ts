@@ -6,9 +6,7 @@ const checkJWT = async (req: RequestExt, res: Response, next: NextFunction) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
+      return res.sendStatus(401);
     }
 
     const payload = verifyToken(token);
