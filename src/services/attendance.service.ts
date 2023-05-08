@@ -34,6 +34,14 @@ const registerAttendance = async (
     throw new Error("Event not found");
   }
 
+  const today = new Date();
+
+  if (event.endDate) {
+    if (event.endDate < today) {
+      throw new Error("Event has ended");
+    }
+  }
+
   const groupId = event.Group.id;
 
   const member = await prisma.member.findFirst({
