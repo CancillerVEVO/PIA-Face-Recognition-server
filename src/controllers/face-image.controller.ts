@@ -42,8 +42,9 @@ const recognizeFaceController = async (
   res: Response
 ) => {
   try {
-    await recognizeFace(file, user?.id);
-    res.status(200).json({ message: "Face recognized successfully" });
+    const data = await recognizeFace(file, user?.id);
+    res.status(200);
+    res.send(data);
   } catch (e) {
     res.status(404);
     e instanceof Error
