@@ -19,6 +19,8 @@ const createGroupController = async (
     res.send(group);
   } catch (e) {
     res.status(403);
+    console.log(e);
+
     e instanceof Error
       ? res.json({ message: e.message })
       : res.json({ message: e });
