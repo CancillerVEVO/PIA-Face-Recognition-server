@@ -4,9 +4,7 @@ import { faceData } from "../interfaces/recognition-service.interface";
 
 const SERVICE_URL = process.env.SERVICE_URL as string;
 
-const recognize = async (
-  body: faceData
-): Promise<{ message: string; status: number }> => {
+const recognize = async (body: faceData): Promise<{ message: string }> => {
   return new Promise((resolve, reject) => {
     axios
       .post(SERVICE_URL, body, {
@@ -16,15 +14,16 @@ const recognize = async (
       })
       .then(async (response) => {
         await deleteImage(body.unknown);
-        resolve({ message: "Succes", status: response.status });
+        resolve({ message: "Succes!" });
       })
       .catch(async (error) => {
         await deleteImage(body.unknown);
         if (error.response) {
-          resolve({
-            message: "Face data does not match with any user",
-            status: error.response.status,
-          });
+          reject(
+            new Error(
+              "Face not recognized, please try again with another image"
+            )
+          );
         } else if (error.request) {
           reject(new Error("Error connecting to service"));
         } else {

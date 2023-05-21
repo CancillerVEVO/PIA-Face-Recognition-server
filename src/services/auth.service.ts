@@ -65,9 +65,38 @@ const login = async ({ email, password }: User) => {
 
   const token = generateToken({
     id: user.id,
+    username: user.username,
+    email: user.email,
+    imageUrl: user.imageUrl,
   });
 
-  return token;
+  return {
+    token,
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      imageUrl: user.imageUrl,
+    },
+  };
 };
 
-export { register, login };
+const me = async (id: number) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: id,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    imageUrl: user.imageUrl,
+  };
+};
+export { register, login, me };

@@ -34,7 +34,7 @@ const saveFaceData = async (file: any, id: number) => {
     },
   });
 
-  return updatedUser;
+  return url;
 };
 
 const deleteFaceData = async (id: number) => {

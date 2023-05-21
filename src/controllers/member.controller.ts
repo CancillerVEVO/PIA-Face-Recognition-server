@@ -60,10 +60,10 @@ const createMemberController = async (
       throw new Error("Invalid user id");
     }
 
-    await addMemberToGroup(groupId, userId, user?.id);
+    const member = await addMemberToGroup(groupId, userId, user?.id);
 
     res.status(200);
-    res.send({ message: "Member added" });
+    res.send({ member });
   } catch (error) {
     res.status(403);
     error instanceof Error
@@ -81,13 +81,13 @@ const deleteMemberController = async (
       throw new Error("Invalid group id");
     }
 
-    const userId = parseInt(params?.memberId);
+    const memberId = parseInt(params?.memberId);
 
-    if (!userId) {
-      throw new Error("Invalid user id");
+    if (!memberId) {
+      throw new Error("Invalid member id");
     }
 
-    await removeMemberFromGroup(groupId, userId, user?.id);
+    await removeMemberFromGroup(groupId, memberId, user?.id);
 
     res.status(200);
     res.send({ message: "Member removed" });

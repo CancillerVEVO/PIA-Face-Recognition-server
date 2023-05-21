@@ -22,6 +22,7 @@ const searchUserByName = async (name: string, userId: number) => {
       id: true,
       username: true,
       email: true,
+      imageUrl: true,
     },
   });
 
@@ -129,20 +130,26 @@ const addMemberToGroup = async (
 
 const removeMemberFromGroup = async (
   groupId: number,
-  userId: number,
+  memberId: number,
   adminId: number
 ) => {
-  if (userId === adminId) {
-    throw new Error("You cannot remove yourself from the group");
-  }
-  const userExists = await prisma.user.findUnique({
+  const isMember = await prisma.member.findUnique({
     where: {
-      id: userId,
+      id: memberId,
+    },
+    include: {
+      Group: true,
     },
   });
 
-  if (!userExists) {
-    throw new Error("User not found");
+  if (!isMember) {
+    throw new Error("Member not found");
+  }
+
+  const groupIsDeleted = isMember.Group.deletedAt != null;
+
+  if (groupIsDeleted) {
+    throw new Error("Group not found");
   }
 
   const isAdmin = await prisma.member.findFirst({
@@ -153,38 +160,20 @@ const removeMemberFromGroup = async (
     },
     include: {
       Group: true,
-      User: true,
     },
   });
-
-  const groupIsDeleted = isAdmin?.Group.deletedAt != null;
-
-  if (groupIsDeleted) {
-    throw new Error("Group not found");
-  }
 
   if (!isAdmin) {
     throw new Error("You are not an admin of this group");
   }
 
-  const isMember = await prisma.member.findFirst({
-    where: {
-      groupId: groupId,
-      userId: userId,
-    },
-  });
-
-  if (!isMember) {
-    throw new Error("User is not a member of this group");
-  }
-
   const member = await prisma.member.delete({
     where: {
-      id: isMember.id,
+      id: memberId,
     },
   });
 
-  return { message: "User removed from group" };
+  return member;
 };
 export {
   searchUserByName,

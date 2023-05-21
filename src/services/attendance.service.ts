@@ -63,10 +63,6 @@ const registerAttendance = async (
 
   const result = await recognizeFace(file, userId);
 
-  if (result.status !== 200) {
-    throw new Error(result.message);
-  }
-
   const attendance = await prisma.attendance.create({
     data: {
       memberId: member.id,

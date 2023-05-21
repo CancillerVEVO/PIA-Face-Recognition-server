@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { register, login } from "../services";
+import { register, login, me } from "../services";
+import { RequestExt } from "../interfaces/requestExt";
 
 const registerController = async ({ body }: Request, res: Response) => {
   try {
@@ -21,7 +22,7 @@ const loginController = async ({ body }: Request, res: Response) => {
     const user = await login(body);
 
     res.status(200);
-    res.send(user);
+    res.json(user);
   } catch (e) {
     console.log(e);
 
@@ -31,5 +32,18 @@ const loginController = async ({ body }: Request, res: Response) => {
       : res.json({ message: e });
   }
 };
+const meController = async ({ user }: RequestExt, res: Response) => {
+  try {
+    const meUser = await me(user?.id);
 
-export { registerController, loginController };
+    res.status(200);
+    res.json(meUser);
+  } catch (error) {
+    res.status(403);
+    error instanceof Error
+      ? res.json({ message: error.message })
+      : res.json({ message: error });
+  }
+};
+
+export { registerController, loginController, meController };

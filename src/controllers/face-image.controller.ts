@@ -11,10 +11,10 @@ const uploadFileController = async (
   res: Response
 ) => {
   try {
-    await saveFaceData(file, user?.id);
+    const url = await saveFaceData(file, user?.id);
 
     res.status(200);
-    res.json({ message: "File uploaded successfully" });
+    res.json({ message: "File uploaded successfully", url });
   } catch (e) {
     res.status(500);
     e instanceof Error

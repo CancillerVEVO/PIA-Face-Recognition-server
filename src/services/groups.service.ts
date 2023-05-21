@@ -37,6 +37,9 @@ const getGroupDetail = async (id: number, userId: number) => {
     where: {
       id: id,
     },
+    include: {
+      Event: true,
+    },
   });
 
   if (!group || group.deletedAt != null) {
@@ -69,18 +72,32 @@ const getGroupDetail = async (id: number, userId: number) => {
     title: group.title,
     description: group.description,
     createdAt: group.createdAt,
-  };
-  const cleanMembers = members.map((member) => {
-    return {
-      id: member.id,
-      username: member.User.username,
-      email: member.User.email,
-      imageUrl: member.User.imageUrl,
-      role: member.MemberRole.title,
-    };
-  });
+    currentUserRole: group.createdBy == userId ? "ADMIN" : "MEMBER",
 
-  return { ...cleanGroup, members: cleanMembers };
+    events:
+      group.Event.map((event) => {
+        return {
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          startDate: event.startDate,
+          endDate: event.endDate,
+        };
+      }) || [],
+    members:
+      members.map((member) => {
+        return {
+          id: member.id,
+          username: member.User.username,
+          email: member.User.email,
+          imageUrl: member.User.imageUrl,
+          joinedAt: member.joinedAt,
+          role: member.MemberRole.title,
+        };
+      }) || [],
+  };
+
+  return { group: cleanGroup };
 };
 
 const editGroup = async (
@@ -159,7 +176,15 @@ const getGroups = async (userId: number) => {
         role: group.MemberRole.title,
       };
     });
-  return cleanGroup;
+
+  const admin = cleanGroup.filter((group) => {
+    return group.role == "ADMIN";
+  });
+
+  const member = cleanGroup.filter((group) => {
+    return group.role == "MEMBER";
+  });
+  return { groups: { admin, member } };
 };
 
 const deleteGroup = async (id: number, userId: number) => {
