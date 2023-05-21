@@ -38,7 +38,11 @@ const getGroupDetail = async (id: number, userId: number) => {
       id: id,
     },
     include: {
-      Event: true,
+      Event: {
+        orderBy: {
+          startDate: "asc",
+        },
+      },
     },
   });
 

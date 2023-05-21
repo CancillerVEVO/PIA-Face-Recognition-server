@@ -84,6 +84,13 @@ const getEventDetail = async (eventId: number, userId: number) => {
 
     include: {
       Group: true,
+      Attendance: {
+        include: {
+          Member: {
+            include: { User: true },
+          },
+        },
+      },
     },
   });
 
@@ -92,12 +99,70 @@ const getEventDetail = async (eventId: number, userId: number) => {
   }
   await userInGroup(userId, event.groupId);
 
-  return {
+  const getAllMembers = await prisma.member.findMany({
+    where: {
+      groupId: event.groupId,
+    },
+    include: {
+      User: true,
+    },
+  });
+
+  const createAttendanceList = (members: any, attendance: any) => {
+    const attendanceList = members.map((member: any) => {
+      const memberAttendance = attendance.find(
+        (attend: any) => attend.id === member.id
+      );
+      if (memberAttendance) {
+        return {
+          id: member.id,
+          username: member.username,
+          email: member.email,
+          imageUrl: member.imageUrl,
+          attendedDate: memberAttendance.attendedDate,
+        };
+      } else {
+        return {
+          id: member.id,
+          username: member.username,
+          email: member.email,
+          imageUrl: member.imageUrl,
+          attendedDate: null,
+        };
+      }
+    });
+    return attendanceList;
+  };
+
+  const cleanMembers = getAllMembers.map((member) => {
+    return {
+      id: member.id,
+      username: member.User.username,
+      email: member.User.email,
+      imageUrl: member.User.imageUrl,
+    };
+  });
+  const cleanAttendance = event.Attendance.map((attendance) => {
+    return {
+      id: attendance.memberId,
+      username: attendance.Member.User.username,
+      email: attendance.Member.User.email,
+      imageUrl: attendance.Member.User.imageUrl,
+      attendedDate: attendance.attendedDate,
+    };
+  });
+
+  const cleanEvent = {
     id: event.id,
     title: event.title,
     description: event.description,
     startDate: event.startDate,
     endDate: event.endDate,
+    attendance: createAttendanceList(cleanMembers, cleanAttendance),
+  };
+
+  return {
+    event: cleanEvent,
   };
 };
 const getEvents = async (userId: number, groupId: number) => {

@@ -68,9 +68,24 @@ const registerAttendance = async (
       memberId: member.id,
       eventId: eventId,
     },
+    include: {
+      Member: {
+        include: {
+          User: true,
+        },
+      },
+    },
   });
 
-  return attendance;
+  const cleanAttendance = {
+    id: attendance.Member.id,
+    username: attendance.Member.User.username,
+    email: attendance.Member.User.email,
+    imageUrl: attendance.Member.User.imageUrl,
+    attendedDate: attendance.attendedDate,
+  };
+
+  return { attendance: cleanAttendance };
 };
 
 const listAttendance = async (eventId: number, userId: number) => {
@@ -78,8 +93,16 @@ const listAttendance = async (eventId: number, userId: number) => {
     where: {
       id: eventId,
     },
+
     include: {
       Group: true,
+      Attendance: {
+        include: {
+          Member: {
+            include: { User: true },
+          },
+        },
+      },
     },
   });
 
@@ -100,31 +123,62 @@ const listAttendance = async (eventId: number, userId: number) => {
     throw new Error("You are not a member of this group");
   }
 
-  const attendance = await prisma.attendance.findMany({
+  const getAllMembers = await prisma.member.findMany({
     where: {
-      eventId: eventId,
+      groupId: event.groupId,
     },
     include: {
-      Member: {
-        include: {
-          User: true,
-          MemberRole: true,
-        },
-      },
+      User: true,
     },
   });
 
-  const cleanAttendance = attendance.map((item) => {
+  const createAttendanceList = (members: any, attendance: any) => {
+    const attendanceList = members.map((member: any) => {
+      const memberAttendance = attendance.find(
+        (attend: any) => attend.id === member.id
+      );
+      if (memberAttendance) {
+        return {
+          id: member.id,
+          username: member.username,
+          email: member.email,
+          imageUrl: member.imageUrl,
+          attendedDate: memberAttendance.attendedDate,
+        };
+      } else {
+        return {
+          id: member.id,
+          username: member.username,
+          email: member.email,
+          imageUrl: member.imageUrl,
+          attendedDate: null,
+        };
+      }
+    });
+    return attendanceList;
+  };
+
+  const cleanMembers = getAllMembers.map((member) => {
     return {
-      memberId: item.memberId,
-      role: item.Member.MemberRole.title,
-      username: item.Member.User.username,
-      email: item.Member.User.email,
-      attendanceDate: item.attendedDate,
+      id: member.id,
+      username: member.User.username,
+      email: member.User.email,
+      imageUrl: member.User.imageUrl,
+    };
+  });
+  const cleanAttendance = event.Attendance.map((attendance) => {
+    return {
+      id: attendance.memberId,
+      username: attendance.Member.User.username,
+      email: attendance.Member.User.email,
+      imageUrl: attendance.Member.User.imageUrl,
+      attendedDate: attendance.attendedDate,
     };
   });
 
-  return cleanAttendance;
+  const attendanceList = createAttendanceList(cleanMembers, cleanAttendance);
+
+  return { attendance: attendanceList };
 };
 
 export { registerAttendance, listAttendance };

@@ -62,7 +62,7 @@ model Attendance {
   memberId     Int
   eventId      Int
   attendedDate DateTime @default(now()) @db.Timestamptz(6)
-  Event        Event    @relation(fields: [eventId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   Member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([memberId, eventId])
